@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StudentFormRequest;
 use Illuminate\Http\Request;
 use App\Models\Student;
+use Illuminate\Support\Facades\Validator;
 
 class StudentController extends Controller
 {
@@ -12,64 +12,48 @@ class StudentController extends Controller
 
     public function index()
     {
-        $this->data['title'] = 'Student Form Request Validation';
-        $this->data['students'] = Student::all();
+        $this->data['title'] = 'Data Student';
         return view('students.index', $this->data);
     }
 
-    public function create()
+    public function store(Request $request)
     {
-        $this->data['title'] = 'Add Student with Form Request Validation';
-        return view('students.create', $this->data);
-    }
-
-    public function store(StudentFormRequest $request)
-    {
-        $data = $request->validated();
-        $data['student_created_at'] = time();
-        try {
-            Student::create($data);
-            return redirect()->route('student.index')->with('msg', 'Added Successfully');
-        } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+        if($request->ajax()){
+            return response()->json([
+                'status' => 400,
+                'message' => ['request' => 'Bad Request']
+            ]);
         }
-    }
 
-    public function show(Student $student)
-    {
-        $this->data['title'] = 'Show Student with Form Request Validation';
-        $this->data['student'] = $student;
-        return view('students.show', $this->data);
-    }
+        $validator = Validator::make($request->all(), [
+            'student_full_name' => 'required|string|max:191',
+            'student_email' => 'required|email|unique:students,student_email',
+            'student_phone' => 'required|digits:10',
+            'student_course' => 'required|string|max:191',
+        ]);
 
-    public function edit(Student $student)
-    {
-        $this->data['title'] = 'Edit Student with Form Request Validation';
-        $this->data['student'] = $student;
-        return view('students.edit', $this->data);
-    }
-
-    public function update(StudentFormRequest $request, Student $student)
-    {
-
-        $data = $request->validated();
-        $data['student_updated_at'] = time();
-        try {
-            $student->fill($data);
-            $student->save();
-            return redirect()->route('student.index')->with('msg', 'Updated Successfully');
-        } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+        if($validator->fails()) {
+            return response()->json([
+                'status' => 400,
+                'message' => $validator->messages(),
+            ]);
         }
-    }
 
-    public function destroy(Student $student)
-    {
-        try {
-            $student->delete();
-            return redirect()->back()->with('msg', 'Deleted Successfully');
-        } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+        $student = new Student();
+        $student->student_full_name = $request->input('student_full_name');
+        $student->student_email = $request->input('student_email');
+        $student->student_phone = $request->input('student_phone');
+        $student->student_course = $request->input('student_course');
+        if(!$student->save()) {
+            return response()->json([
+                'status' => 200,
+                'message' => 'Added Successfully',
+            ]);
         }
+
+        return response()->json([
+            'status' => 500,
+            'message' => 'Internal Server Error',
+        ]);
     }
 }
