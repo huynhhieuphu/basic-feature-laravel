@@ -24,5 +24,6 @@ Route::prefix('/student')->name('student.')->group(function() {
     Route::get('/fetch-data', [StudentController::class, 'fetch'])->name('fetch');
     Route::get('/{id}/edit', [StudentController::class, 'edit'])->name('edit');
     Route::put('/{id}', [StudentController::class, 'update'])->name('update');
-    Route::delete('/{id}', [StudentController::class, 'delete'])->name('delete');
+    Route::get('/{id}/delete', [StudentController::class, 'delete'])->name('delete');
+    Route::delete('/{id}', [StudentController::class, 'destroy'])->name('destroy');
 });

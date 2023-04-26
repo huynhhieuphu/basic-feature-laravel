@@ -18,7 +18,7 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        if(!$request->ajax()){
+        if (!$request->ajax()) {
             return response()->json([
                 'status' => 400,
                 'message' => ['request' => 'Bad Request']
@@ -32,7 +32,7 @@ class StudentController extends Controller
             'student_course' => 'required|string|max:191',
         ]);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 400,
                 'message' => $validator->messages(),
@@ -46,7 +46,7 @@ class StudentController extends Controller
         $student->student_course = $request->input('student_course');
         $student->student_created_at = time();
 
-        if($student->save()) {
+        if ($student->save()) {
             return response()->json([
                 'status' => 200,
                 'message' => 'Added Successfully',
@@ -59,10 +59,11 @@ class StudentController extends Controller
         ]);
     }
 
-    public function fetch() {
+    public function fetch()
+    {
         $data = Student::all();
 
-        if(!empty($data)) {
+        if (!empty($data)) {
             return response()->json([
                 'status' => 200,
                 'data' => $data
@@ -76,10 +77,11 @@ class StudentController extends Controller
         ]);
     }
 
-    public function edit($id) {
+    public function edit($id)
+    {
         $student = Student::find($id);
 
-        if(!empty($student)) {
+        if (!empty($student)) {
             return response()->json([
                 'status' => 200,
                 'data' => $student
@@ -92,23 +94,23 @@ class StudentController extends Controller
         ]);
     }
 
-    public function update(Request $request, $id) {
-        if(!$request->ajax()){
+    public function update(Request $request, $id)
+    {
+        if (!$request->ajax()) {
             return response()->json([
                 'status' => 400,
                 'message' => ['request' => 'Bad Request']
             ]);
         }
 
-        $student_id = $request->input('student_id');
         $validator = Validator::make($request->all(), [
             'student_full_name' => 'required|string|max:191',
-            'student_email' => 'required|email|unique:students,student_email,'. $id .',student_id',
+            'student_email' => 'required|email|unique:students,student_email,'.$id.',student_id',
             'student_phone' => 'required|digits:10',
             'student_course' => 'required|string|max:191',
         ]);
 
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return response()->json([
                 'status' => 400,
                 'message' => $validator->messages(),
@@ -117,14 +119,14 @@ class StudentController extends Controller
 
         $student = Student::find($id);
 
-        if($student) {
+        if ($student) {
             $student->student_full_name = $request->input('student_full_name');
             $student->student_email = $request->input('student_email');
             $student->student_phone = $request->input('student_phone');
             $student->student_course = $request->input('student_course');
             $student->student_updated_at = time();
 
-            if($student->update()) {
+            if ($student->update()) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'Updated Successfully',
@@ -143,8 +145,26 @@ class StudentController extends Controller
         ]);
     }
 
-    public function delete(Request $request, $id) {
-        if(!$request->ajax()){
+    public function delete($id)
+    {
+        $student = Student::find($id);
+
+        if (!empty($student)) {
+            return response()->json([
+                'status' => 200,
+                'data' => $student
+            ]);
+        }
+
+        return response()->json([
+            'status' => 400,
+            'message' => 'No found'
+        ]);
+    }
+
+    public function destroy(Request $request, $id)
+    {
+        if (!$request->ajax()) {
             return response()->json([
                 'status' => 400,
                 'message' => 'Bad Request'
@@ -152,8 +172,8 @@ class StudentController extends Controller
         }
 
         $student = Student::find($id);
-        if(!empty($student)) {
-            if($student->delete()) {
+        if (!empty($student)) {
+            if ($student->delete()) {
                 return response()->json([
                     'status' => 200,
                     'message' => 'Deleted Successfully',

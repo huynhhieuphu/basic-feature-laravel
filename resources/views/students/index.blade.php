@@ -44,7 +44,7 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary clear_student" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-success add_student">Save</button>
                 </div>
             </div>
@@ -90,13 +90,36 @@
 
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary clear_student" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                     <button type="button" class="btn btn-primary update_student">Update</button>
                 </div>
             </div>
         </div>
     </div>
     {{-- editStudentModal --}}
+
+    {{-- deleteStudentModal --}}
+    <div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteStudentModal">Delete Student</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" class="student_id_delete">
+                    Are you Sure ?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-danger destroy_student">Destory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- deleteStudentModal --}}
 
     <div class="container py-4">
         <div class="row">
@@ -157,8 +180,8 @@
                                     '<td>' + value.student_email + '</td>\n' +
                                     '<td>' + value.student_phone + '</td>\n' +
                                     '<td>' + value.student_course + '</td>\n' +
-                                    '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-primary btn-sm edit_student">Edit</button></td>\n' +
-                                    '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-danger btn-sm delete_student">Delete</button></td>\n' +
+                                    '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-primary btn-sm edit_student" data-toggle="modal" data-target="#editStudentModal">Edit</button></td>\n' +
+                                    '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-danger btn-sm delete_student" data-toggle="modal" data-target="#deleteStudentModal">Delete</button></td>\n' +
                                     '</tr>');
                             });
                         }
@@ -206,12 +229,6 @@
             $(document).on('click', '.update_student', function (e) {
                 e.preventDefault();
 
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
                 let student_id = $('.student_id_edit').val();
                 let url = '{{ route("student.update", ["id" => ":id"]) }}';
                 url = url.replace(':id', student_id);
@@ -222,6 +239,12 @@
                     student_phone: $('.student_phone_edit').val(),
                     student_course: $('.student_course_edit').val()
                 };
+
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
 
                 $.ajax({
                     type: 'PUT',
@@ -258,6 +281,31 @@
                 let student_id = $(this).data('id');
                 let url = '{{ route("student.delete", ["id" => ":id"]) }}';
                 url = url.replace(':id', student_id);
+
+                $.ajax({
+                    type: 'GET',
+                    url: url,
+                    beforeSend: function () {
+                        clearMessage();
+                    },
+                    success: function (response) {
+                        if (response.status === 200) {
+                            $('.student_id_delete').val(response.data.student_id);
+                        }
+
+                        if (response.status === 400) {
+                            $('#message').addClass('alert alert-danger').text(response.message);
+                        }
+                    }
+                });
+            });
+
+            $(document).on('click', '.destroy_student', function (e) {
+                e.preventDefault();
+                let student_id = $('.student_id_delete').val();
+                let url = '{{ route("student.destroy", ["id" => ":id"]) }}';
+                url = url.replace(':id', student_id);
+
                 $.ajaxSetup({
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -271,13 +319,15 @@
                         clearMessage();
                     },
                     success: function (response) {
-                        if (response.status == 400) {
-                            $('#message').addClass('alert alert-danger').text(response.message);
+                        console.log(response);
+                        if (response.status === 200) {
+                            $('#message').addClass('alert alert-warning').text(response.message);
+                            $('#deleteStudentModal').modal('hide');
+                            fetchData();
                         }
 
-                        if (response.status == 200) {
-                            $('#message').addClass('alert alert-success').text(response.message);
-                            fetchData();
+                        if (response.status === 400) {
+                            $('#message').addClass('alert alert-danger').text(response.message);
                         }
                     }
                 });
@@ -285,6 +335,13 @@
 
             $(document).on('click', '.add_student', function (e) {
                 e.preventDefault();
+
+                let data = {
+                    student_full_name: $('.student_full_name').val(),
+                    student_email: $('.student_email').val(),
+                    student_phone: $('.student_phone').val(),
+                    student_course: $('.student_course').val()
+                };
 
                 $.ajaxSetup({
                     headers: {
@@ -295,12 +352,7 @@
                 $.ajax({
                     type: 'POST',
                     url: '{{ route("student.store") }}',
-                    data: {
-                        student_full_name: $('.student_full_name').val(),
-                        student_email: $('.student_email').val(),
-                        student_phone: $('.student_phone').val(),
-                        student_course: $('.student_course').val()
-                    },
+                    data: data,
                     dataType: 'JSON',
                     beforeSend: function () {
                         clearAddStudentModal();
