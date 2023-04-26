@@ -21,4 +21,7 @@ Route::get('/', function () {
 Route::prefix('/student')->name('student.')->group(function() {
     Route::get('/', [StudentController::class, 'index'])->name('index');
     Route::post('/', [StudentController::class, 'store'])->name('store');
+    Route::get('/fetch-data', [StudentController::class, 'fetch'])->name('fetch');
+    Route::get('/{id}/edit', [StudentController::class, 'edit'])->name('edit');
+    Route::put('/', [StudentController::class, 'update'])->name('update');
 });
