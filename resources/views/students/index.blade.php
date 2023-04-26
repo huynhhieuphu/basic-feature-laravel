@@ -251,6 +251,36 @@
                 });
             });
 
+            $(document).on('click', '.delete_student', function (e) {
+                e.preventDefault();
+                let student_id = $(this).data('id');
+                let url = '{{ route("student.delete", ["id" => ":id"]) }}';
+                url = url.replace(':id', student_id);
+                $.ajaxSetup({
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    }
+                });
+
+                $.ajax({
+                    type: 'DELETE',
+                    url: url,
+                    beforeSend: function () {
+                        clearMessage();
+                    },
+                    success: function (response) {
+                        if (response.status == 400) {
+                            $('#message').addClass('alert alert-danger').text(response.message);
+                        }
+
+                        if (response.status == 200) {
+                            $('#message').addClass('alert alert-success').text(response.message);
+                            fetchData();
+                        }
+                    }
+                });
+            });
+
             $(document).on('click', '.add_student', function (e) {
                 e.preventDefault();
 

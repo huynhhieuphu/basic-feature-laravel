@@ -142,4 +142,33 @@ class StudentController extends Controller
             'message' => ['request' => 'Not found']
         ]);
     }
+
+    public function delete(Request $request, $id) {
+        if(!$request->ajax()){
+            return response()->json([
+                'status' => 400,
+                'message' => 'Bad Request'
+            ]);
+        }
+
+        $student = Student::find($id);
+        if(!empty($student)) {
+            if($student->delete()) {
+                return response()->json([
+                    'status' => 200,
+                    'message' => 'Deleted Successfully',
+                ]);
+            }
+
+            return response()->json([
+                'status' => 400,
+                'message' => 'System Error',
+            ]);
+
+        }
+        return response()->json([
+            'status' => 400,
+            'message' => 'Not found'
+        ]);
+    }
 }
