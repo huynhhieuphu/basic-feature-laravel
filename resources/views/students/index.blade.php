@@ -207,9 +207,6 @@
                     type: 'GET',
                     url: url,
                     dataType: 'json',
-                    beforeSend: function () {
-                        clearMessage();
-                    },
                     success: function (response) {
                         if (response.status === 200) {
                             $('.student_id_edit').val(response.data.student_id);
@@ -251,9 +248,6 @@
                     url: url,
                     data: data,
                     dataType: 'JSON',
-                    beforeSend: function () {
-                        clearMessage();
-                    },
                     success: function (response) {
                         if (response.status === 400) {
                             $('#saveForm_errList_edit').addClass('alert alert-danger');
@@ -285,9 +279,6 @@
                 $.ajax({
                     type: 'GET',
                     url: url,
-                    beforeSend: function () {
-                        clearMessage();
-                    },
                     success: function (response) {
                         if (response.status === 200) {
                             $('.student_id_delete').val(response.data.student_id);
@@ -315,13 +306,10 @@
                 $.ajax({
                     type: 'DELETE',
                     url: url,
-                    beforeSend: function () {
-                        clearMessage();
-                    },
                     success: function (response) {
                         console.log(response);
                         if (response.status === 200) {
-                            $('#message').addClass('alert alert-warning').text(response.message);
+                            $('#message').addClass('alert alert-danger').text(response.message);
                             $('#deleteStudentModal').modal('hide');
                             fetchData();
                         }
@@ -356,7 +344,6 @@
                     dataType: 'JSON',
                     beforeSend: function () {
                         clearAddStudentModal();
-                        clearMessage();
                     },
                     success: function (response) {
                         if (response.status === 400) {
@@ -397,10 +384,6 @@
             function clearEditStudentModal() {
                 $('#saveForm_errList_edit').html('').removeClass('alert alert-danger');
                 $('.err_msg_edit').text('');
-            }
-
-            function clearMessage() {
-                $('#message').html('').removeClass('alert alert-danger');
             }
         });
     </script>
