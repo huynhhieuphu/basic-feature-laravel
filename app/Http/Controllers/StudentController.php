@@ -92,7 +92,7 @@ class StudentController extends Controller
         ]);
     }
 
-    public function update(Request $request) {
+    public function update(Request $request, $id) {
         if(!$request->ajax()){
             return response()->json([
                 'status' => 400,
@@ -103,7 +103,7 @@ class StudentController extends Controller
         $student_id = $request->input('student_id');
         $validator = Validator::make($request->all(), [
             'student_full_name' => 'required|string|max:191',
-            'student_email' => 'required|email|unique:students,student_email,'. $student_id .',student_id',
+            'student_email' => 'required|email|unique:students,student_email,'. $id .',student_id',
             'student_phone' => 'required|digits:10',
             'student_course' => 'required|string|max:191',
         ]);
@@ -115,7 +115,7 @@ class StudentController extends Controller
             ]);
         }
 
-        $student = Student::find($student_id);
+        $student = Student::find($id);
 
         if($student) {
             $student->student_full_name = $request->input('student_full_name');

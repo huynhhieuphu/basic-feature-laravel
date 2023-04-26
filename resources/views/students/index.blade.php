@@ -212,8 +212,11 @@
                     }
                 });
 
+                let student_id = $('.student_id_edit').val();
+                let url = '{{ route("student.update", ["id" => ":id"]) }}';
+                url = url.replace(':id', student_id);
+
                 let data = {
-                    student_id: $('.student_id_edit').val(),
                     student_full_name: $('.student_full_name_edit').val(),
                     student_email: $('.student_email_edit').val(),
                     student_phone: $('.student_phone_edit').val(),
@@ -222,14 +225,13 @@
 
                 $.ajax({
                     type: 'PUT',
-                    url: '{{ route("student.update") }}',
+                    url: url,
                     data: data,
                     dataType: 'JSON',
                     beforeSend: function () {
                         clearMessage();
                     },
                     success: function (response) {
-                        console.log(response);
                         if (response.status === 400) {
                             $('#saveForm_errList_edit').addClass('alert alert-danger');
                             $.each(response.message, function (key, value) {
