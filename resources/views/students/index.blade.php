@@ -249,6 +249,12 @@
                     data: data,
                     dataType: 'json',
                     success: function (response) {
+                        if (response.status === 200) {
+                            $('#message').addClass('alert alert-success').text(response.message);
+                            $('#editStudentModal').modal('hide');
+                            fetchData();
+                        }
+
                         if (response.status === 400) {
                             $('#saveForm_errList_edit').addClass('alert alert-danger');
                             $.each(response.message, function (key, value) {
@@ -259,12 +265,6 @@
                             $('.err_email_edit').text(response.message.student_email);
                             $('.err_phone_edit').text(response.message.student_phone);
                             $('.err_course_edit').text(response.message.student_course);
-                        }
-
-                        if (response.status === 200) {
-                            $('#message').addClass('alert alert-success').text(response.message);
-                            $('#editStudentModal').modal('hide');
-                            fetchData();
                         }
                     }
                 });
@@ -301,7 +301,6 @@
                     type: 'DELETE',
                     url: url,
                     success: function (response) {
-                        console.log(response);
                         if (response.status === 200) {
                             $('#message').addClass('alert alert-danger').text(response.message);
                             $('#deleteStudentModal').modal('hide');
@@ -334,6 +333,12 @@
                         clearAddStudentModal();
                     },
                     success: function (response) {
+                        if (response.status === 200) {
+                            $('#message').addClass('alert alert-success').text(response.message);
+                            $('#addStudentModal').modal('hide').find('input').val('');
+                            fetchData();
+                        }
+
                         if (response.status === 400) {
                             $('#saveForm_errList').addClass('alert alert-danger');
                             $.each(response.message, function (key, value) {
@@ -344,12 +349,6 @@
                             $('.err_email').text(response.message.student_email);
                             $('.err_phone').text(response.message.student_phone);
                             $('.err_course').text(response.message.student_course);
-                        }
-
-                        if (response.status === 200) {
-                            $('#message').addClass('alert alert-success').text(response.message);
-                            $('#addStudentModal').modal('hide').find('input').val('');
-                            fetchData();
                         }
                     }
                 });
