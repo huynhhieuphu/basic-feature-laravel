@@ -161,13 +161,19 @@
 @push('script')
     <script>
         $(document).ready(function () {
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+            });
+
             fetchData();
 
             function fetchData() {
                 $.ajax({
                     type: 'GET',
                     url: '{{ route('student.fetch') }}',
-                    dataType: 'JSON',
+                    dataType: 'json',
                     beforeSend: function () {
                         $('tbody').html('');
                     },
@@ -237,17 +243,11 @@
                     student_course: $('.student_course_edit').val()
                 };
 
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
                 $.ajax({
                     type: 'PUT',
                     url: url,
                     data: data,
-                    dataType: 'JSON',
+                    dataType: 'json',
                     success: function (response) {
                         if (response.status === 400) {
                             $('#saveForm_errList_edit').addClass('alert alert-danger');
@@ -297,12 +297,6 @@
                 let url = '{{ route("student.destroy", ["id" => ":id"]) }}';
                 url = url.replace(':id', student_id);
 
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
                 $.ajax({
                     type: 'DELETE',
                     url: url,
@@ -331,17 +325,11 @@
                     student_course: $('.student_course').val()
                 };
 
-                $.ajaxSetup({
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    }
-                });
-
                 $.ajax({
                     type: 'POST',
                     url: '{{ route("student.store") }}',
                     data: data,
-                    dataType: 'JSON',
+                    dataType: 'json',
                     beforeSend: function () {
                         clearAddStudentModal();
                     },
