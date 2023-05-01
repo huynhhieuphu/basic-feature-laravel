@@ -28,7 +28,7 @@
                             </ul>
                         @endif
 
-                        <form action="{{ route('student.update', ['student' => $student]) }}" method="POST">
+                        <form action="{{ route('student.update', ['student' => $student]) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <div class="form-group">
@@ -50,6 +50,14 @@
                                 <label for="student_course">Course</label>
                                 <input type="text" name="student_course" class="form-control" value="{{ old('student_course') ?? $student->student_course }}">
                                 <span class="text-danger">@error('student_course') {{ $message }} @enderror</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="student_course">Avatar</label>
+                                <input type="file" name="student_avatar" class="form-control">
+                                <span class="text-danger">@error('student_avatar') {{ $message }} @enderror</span>
+                                @if(!empty($student->student_avatar))
+                                    <img src="{{ asset('app/uploads/'. $student->student_avatar) }}" alt="{{$student->student_course}}" width="100" height="100" class="my-2">
+                                @endif
                             </div>
                             <button type="submit" class="btn btn-primary">Update Student</button>
                         </form>

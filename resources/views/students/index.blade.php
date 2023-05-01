@@ -17,7 +17,7 @@
                     </div>
                     <div class="card-body">
                         @if(!empty(session('msg')))
-                            {{ session('msg') }}
+                            <div class="alert alert-success">{{ session('msg') }}</div>
                         @endif
 
                         <table class="table table-bordered">
@@ -28,7 +28,10 @@
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Course</th>
-                                <th>Action</th>
+                                <th>Avatar</th>
+                                <th>Show</th>
+                                <th>Delete</th>
+                                <th>Edit</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -41,14 +44,23 @@
                                         <td>{{ $student->student_email }}</td>
                                         <td>{{ $student->student_phone }}</td>
                                         <td>{{ $student->student_course }}</td>
-                                        <td class="d-flex justify-content-between">
+                                        <td>
+                                            @if(!empty($student->student_avatar))
+                                                <img src="{{ asset('app/uploads/'. $student->student_avatar) }}" alt="{{ $student->student_avatar }}" width="70" height="70">
+                                            @endif
+                                        </td>
+                                        <td>
                                             <a href="{{ route('student.show', ['student' => $student]) }}" target="_self" class="btn btn-warning">View</a>
-                                            <a href="{{ route('student.edit', ['student' => $student]) }}" target="_self" class="btn btn-primary">Edit</a>
+                                        </td>
+                                        <td>
                                             <form action="{{ route('student.destroy', ['student' => $student]) }}" method="POST">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-danger">Delete</button>
                                             </form>
+                                        </td>
+                                        <td>
+                                            <a href="{{ route('student.edit', ['student' => $student]) }}" target="_self" class="btn btn-primary">Edit</a>
                                         </td>
                                     </tr>
                                 @endforeach

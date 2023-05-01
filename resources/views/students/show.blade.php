@@ -19,6 +19,16 @@
                         <table class="table table-bordered">
                             <tbody>
                                 <tr>
+                                    <th>
+                                        Avatar
+                                    </th>
+                                    <td>
+                                        @if(!empty($student->student_avatar))
+                                            <img src="{{ asset('app/uploads/'.$student->student_avatar) }}" alt="{{ $student->student_avatar }}" width="100" height="100">
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Full name</th>
                                     <td>{{ $student->student_full_name }}</td>
                                 </tr>

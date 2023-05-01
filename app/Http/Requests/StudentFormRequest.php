@@ -31,14 +31,16 @@ class StudentFormRequest extends FormRequest
 
         if ($this->getMethod() == 'POST') {
             $rules += [
-                'student_email' => 'required|email|max:191|unique:students,student_email'
+                'student_email' => 'required|email|max:191|unique:students,student_email',
+                'student_avatar' => 'required|mimes:jpeg,png,jpg,gif|max:2048',
             ];
         }
 
         if ($this->getMethod() == 'PUT') {
             $student = $this->route('student');
             $rules += [
-                'student_email' => 'required|email|max:191|unique:students,student_email,' . $student->student_id . ',student_id'
+                'student_email' => 'required|email|max:191|unique:students,student_email,' . $student->student_id . ',student_id',
+                'student_avatar' => 'nullable|mimes:jpeg,png,jpg,gif|max:2048',
             ];
         }
 

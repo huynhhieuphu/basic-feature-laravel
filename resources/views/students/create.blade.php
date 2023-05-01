@@ -17,7 +17,7 @@
                     </div>
                     <div class="card-body">
                         @if(!empty(session('msg')))
-                            {{ session('msg') }}
+                            <div class="alert alert-success">{{ session('msg') }}</div>
                         @endif
 
                         @if($errors->any())
@@ -28,7 +28,7 @@
                             </ul>
                         @endif
 
-                        <form action="{{ route('student.store') }}" method="POST">
+                        <form action="{{ route('student.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="form-group">
                                 <label for="student_full_name">Full Name</label>
@@ -49,6 +49,11 @@
                                 <label for="student_course">Course</label>
                                 <input type="text" name="student_course" class="form-control" value="{{ old('student_course') ?? false }}">
                                 <span class="text-danger">@error('student_course') {{ $message }} @enderror</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="student_course">Avatar</label>
+                                <input type="file" name="student_avatar" class="form-control">
+                                <span class="text-danger">@error('student_avatar') {{ $message }} @enderror</span>
                             </div>
                             <button type="submit" class="btn btn-success">Save Student</button>
                         </form>

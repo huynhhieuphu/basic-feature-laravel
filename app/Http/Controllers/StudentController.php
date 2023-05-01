@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StudentFormRequest;
 use Illuminate\Http\Request;
 use App\Models\Student;
+use Illuminate\Support\Facades\File;
 
 class StudentController extends Controller
 {
@@ -26,12 +27,24 @@ class StudentController extends Controller
     public function store(StudentFormRequest $request)
     {
         $data = $request->validated();
+
+        //upload file
+        if ($request->hasFile('student_avatar')) {
+            $file = $data['student_avatar'];
+            if ($file->isValid()) {
+                $fileName = $file->getClientOriginalName();
+                $newFile = time().'-'.$fileName;
+                $file->move('app/uploads/', $newFile); //path: public/app/uploads/
+                $data['student_avatar'] = $newFile;
+            }
+        }
         $data['student_created_at'] = time();
+
         try {
             Student::create($data);
             return redirect()->route('student.index')->with('msg', 'Added Successfully');
         } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+            return redirect()->route('student.create')->with('msg', 'Some went wrong '.$ex);
         }
     }
 
@@ -53,23 +66,47 @@ class StudentController extends Controller
     {
 
         $data = $request->validated();
+        //upload file
+        if ($request->hasFile('student_avatar')) {
+
+            // delete old file
+            $destination =  'app/uploads/'.$student->student_avatar;
+            if(File::exists($destination)) {
+                File::delete($destination);
+            }
+
+            $file = $data['student_avatar'];
+            if ($file->isValid()) {
+                $fileName = $file->getClientOriginalName();
+                $newFile = time().'-'.$fileName;
+                $file->move('app/uploads/', $newFile); //path: public/app/uploads/
+                $data['student_avatar'] = $newFile;
+            }
+        }
+
         $data['student_updated_at'] = time();
         try {
             $student->fill($data);
             $student->save();
             return redirect()->route('student.index')->with('msg', 'Updated Successfully');
         } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+            return redirect()->route('student.create')->with('msg', 'Some went wrong '.$ex);
         }
     }
 
     public function destroy(Student $student)
     {
         try {
+            // delete old file
+            $destination =  'app/uploads/'.$student->student_avatar;
+            if(File::exists($destination)) {
+                File::delete($destination);
+            }
+
             $student->delete();
             return redirect()->back()->with('msg', 'Deleted Successfully');
         } catch (\Exception $ex) {
-            return redirect()->route('student.create')->with('msg', 'Some went wrong ' . $ex);
+            return redirect()->route('student.create')->with('msg', 'Some went wrong '.$ex);
         }
     }
 }
