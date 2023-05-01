@@ -34,18 +34,15 @@ class StudentController extends Controller
             ]);
         }
 
-        $data = $validator->validated();
-
         $student = new Student();
-        $student->student_full_name = $data['student_full_name'];
-        $student->student_email = $data['student_email'];
-        $student->student_phone = $data['student_phone'];
-        $student->student_course = $data['student_course'];
+        $student->student_full_name = $request->input('student_full_name');
+        $student->student_email = $request->input('student_email');
+        $student->student_phone = $request->input('student_phone');
+        $student->student_course = $request->input('student_course');
 
         if($request->hasFile('student_avatar')) {
-//            $file = $request->input('student_avatar');
-            $file = $data['student_avatar'];
-            if($file->isValid($file)) {
+            $file = $request->file('student_avatar');
+            if($file->isValid()) {
                 $fileName = $file->getClientOriginalName();
                 $newFile = time() . '-' . $fileName;
                 $file->move('app/uploads/', $newFile);
@@ -64,7 +61,7 @@ class StudentController extends Controller
 
         return response()->json([
             'status' => 400,
-            'message' => ['request' => 'System Error']
+            'message' => ['System Error']
         ]);
     }
 
@@ -105,12 +102,6 @@ class StudentController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!$request->ajax()) {
-            return response()->json([
-                'status' => 400,
-                'message' => ['request' => 'Bad Request']
-            ]);
-        }
 
         $validator = Validator::make($request->all(), [
             'student_full_name' => 'required|string|max:191',
@@ -144,13 +135,13 @@ class StudentController extends Controller
 
             return response()->json([
                 'status' => 400,
-                'message' => ['request' => 'System Error']
+                'message' => ['System Error']
             ]);
         }
 
         return response()->json([
             'status' => 400,
-            'message' => ['request' => 'Not found']
+            'message' => ['Not found']
         ]);
     }
 
@@ -173,13 +164,6 @@ class StudentController extends Controller
 
     public function destroy(Request $request, $id)
     {
-        if (!$request->ajax()) {
-            return response()->json([
-                'status' => 400,
-                'message' => 'Bad Request'
-            ]);
-        }
-
         $student = Student::find($id);
         if (!empty($student)) {
 
