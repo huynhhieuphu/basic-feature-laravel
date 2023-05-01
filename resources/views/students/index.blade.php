@@ -331,20 +331,13 @@
 
             $(document).on('submit', '#formCreate', function (e) {
                 e.preventDefault();
-                let data = new FormData(this);
-
-                console.log(data);
-
-                // for(var pair of data) {
-                //     console.log(pair[0]+ ', '+ pair[1]);
-                // }
+                let formData = new FormData($('form#formCreate')[0]);
 
                 $.ajax({
                     type: 'POST',
                     url: '{{ route("student.store") }}',
-                    data: data,
+                    data: formData,
                     dataType: 'json',
-                    cache: false,
                     contentType: false,
                     processData: false,
                     beforeSend: function () {
@@ -353,7 +346,8 @@
                     success: function (response) {
                         if (response.status === 200) {
                             $('#message').addClass('alert alert-success').text(response.message);
-                            $('#addStudentModal').modal('hide').find('input').val('');
+                            $('#addStudentModal').modal('hide');
+                            $('form#formCreate')[0].reset();
                             fetchData();
                         }
 
@@ -375,7 +369,7 @@
 
             $('#addStudentModal').on('hidden.bs.modal', function () {
                 clearAddStudentModal();
-                $('#addStudentModal').find('input').val('');
+                $('form#formCreate')[0].reset();
             });
 
             $('#editStudentModal').on('hidden.bs.modal', function () {

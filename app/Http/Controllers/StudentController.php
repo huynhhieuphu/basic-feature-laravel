@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\File;
 
 class StudentController extends Controller
 {
@@ -33,17 +34,17 @@ class StudentController extends Controller
             ]);
         }
 
-//        dd($request->input());
+        $data = $validator->validated();
 
         $student = new Student();
-        $student->student_full_name = $request->input('student_full_name');
-        $student->student_email = $request->input('student_email');
-        $student->student_phone = $request->input('student_phone');
-        $student->student_course = $request->input('student_course');
+        $student->student_full_name = $data['student_full_name'];
+        $student->student_email = $data['student_email'];
+        $student->student_phone = $data['student_phone'];
+        $student->student_course = $data['student_course'];
 
         if($request->hasFile('student_avatar')) {
 //            $file = $request->input('student_avatar');
-            $file = $request->student_avatar;
+            $file = $data['student_avatar'];
             if($file->isValid($file)) {
                 $fileName = $file->getClientOriginalName();
                 $newFile = time() . '-' . $fileName;
@@ -181,6 +182,12 @@ class StudentController extends Controller
 
         $student = Student::find($id);
         if (!empty($student)) {
+
+            $destination =  'app/uploads/'.$student->student_avatar;
+            if(File::exists($destination)) {
+                File::delete($destination);
+            }
+
             if ($student->delete()) {
                 return response()->json([
                     'status' => 200,
