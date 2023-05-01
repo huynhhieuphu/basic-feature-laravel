@@ -18,18 +18,12 @@ class StudentController extends Controller
 
     public function store(Request $request)
     {
-        if (!$request->ajax()) {
-            return response()->json([
-                'status' => 400,
-                'message' => ['request' => 'Bad Request']
-            ]);
-        }
-
         $validator = Validator::make($request->all(), [
             'student_full_name' => 'required|string|max:191',
             'student_email' => 'required|email|unique:students,student_email',
             'student_phone' => 'required|digits:10',
             'student_course' => 'required|string|max:191',
+            'student_avatar' => 'required|mimes:jpeg,png,jpg|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -39,11 +33,25 @@ class StudentController extends Controller
             ]);
         }
 
+//        dd($request->input());
+
         $student = new Student();
         $student->student_full_name = $request->input('student_full_name');
         $student->student_email = $request->input('student_email');
         $student->student_phone = $request->input('student_phone');
         $student->student_course = $request->input('student_course');
+
+        if($request->hasFile('student_avatar')) {
+//            $file = $request->input('student_avatar');
+            $file = $request->student_avatar;
+            if($file->isValid($file)) {
+                $fileName = $file->getClientOriginalName();
+                $newFile = time() . '-' . $fileName;
+                $file->move('app/uploads/', $newFile);
+                $student->student_avatar = $newFile;
+            }
+        }
+
         $student->student_created_at = time();
 
         if ($student->save()) {

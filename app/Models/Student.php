@@ -19,7 +19,8 @@ class Student extends Model
         'student_phone',
         'student_course',
         'student_created_at',
-        'student_updated_at'
+        'student_updated_at',
+        'student_avatar',
     ];
 
     public $timestamps = false;

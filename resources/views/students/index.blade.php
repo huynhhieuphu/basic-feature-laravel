@@ -11,42 +11,53 @@
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                <form method="POST" action="javascript:void(0)" id="formCreate" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addStudentModalLabel">Add Student</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="saveForm_errList"></ul>
 
-                    <ul id="saveForm_errList"></ul>
+                        <div class="form-group">
+                            <label for="student_full_name">Full name</label>
+                            <input type="text" id="student_full_name" name="student_full_name"
+                                   class="student_full_name form-control">
+                            <span class="text-danger err_full_name err_msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_email">Email</label>
+                            <input type="text" id="student_email" name="student_email"
+                                   class="student_email form-control">
+                            <span class="text-danger err_email err_msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_phone">Phone</label>
+                            <input type="text" id="student_phone" name="student_phone"
+                                   class="student_phone form-control">
+                            <span class="text-danger err_phone err_msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_course">Course</label>
+                            <input type="text" id="student_course" name="student_course"
+                                   class="student_course form-control">
+                            <span class="text-danger err_course err_msg"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_avatar">Avatar</label>
+                            <input type="file" id="student_avatar" name="student_avatar"
+                                   class="student_avatar form-control">
+                            <span class="text-danger err_avatar err_msg"></span>
+                        </div>
 
-                    <div class="form-group">
-                        <label for="student_full_name">Full name</label>
-                        <input type="text" id="student_full_name" class="student_full_name form-control">
-                        <span class="text-danger err_full_name err_msg"></span>
                     </div>
-                    <div class="form-group">
-                        <label for="student_email">Email</label>
-                        <input type="text" id="student_email" class="student_email form-control">
-                        <span class="text-danger err_email err_msg"></span>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success add_student">Save</button>
                     </div>
-                    <div class="form-group">
-                        <label for="student_phone">Phone</label>
-                        <input type="text" id="student_phone" class="student_phone form-control">
-                        <span class="text-danger err_phone err_msg"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_course">Course</label>
-                        <input type="text" id="student_course" class="student_course form-control">
-                        <span class="text-danger err_course err_msg"></span>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success add_student">Save</button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -99,7 +110,8 @@
     {{-- editStudentModal --}}
 
     {{-- deleteStudentModal --}}
-    <div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-labelledby="deleteStudentModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteStudentModal" tabindex="-1" aria-labelledby="deleteStudentModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -143,6 +155,7 @@
                                 <th>Email</th>
                                 <th>Phone</th>
                                 <th>Course</th>
+                                <th>Avatar</th>
                                 <th>Edit</th>
                                 <th>Delete</th>
                             </tr>
@@ -179,6 +192,7 @@
                     },
                     success: function (response) {
                         if (response.status == 200) {
+                            let public_path = '{{ asset("app/uploads/") }}';
                             $.each(response.data, function (key, value) {
                                 $('tbody').append('<tr>\n' +
                                     '<td>' + (key + 1) + '</td>\n' +
@@ -186,6 +200,7 @@
                                     '<td>' + value.student_email + '</td>\n' +
                                     '<td>' + value.student_phone + '</td>\n' +
                                     '<td>' + value.student_course + '</td>\n' +
+                                    '<td><img src="' + public_path + '/' + value.student_avatar + '" alt="' + value.student_avatar + '" width="70" height="70"></td>\n' +
                                     '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-primary btn-sm edit_student" data-toggle="modal" data-target="#editStudentModal">Edit</button></td>\n' +
                                     '<td><button type="button" data-id="' + value.student_id + '" class="btn btn-danger btn-sm delete_student" data-toggle="modal" data-target="#deleteStudentModal">Delete</button></td>\n' +
                                     '</tr>');
@@ -314,21 +329,24 @@
                 });
             });
 
-            $(document).on('click', '.add_student', function (e) {
+            $(document).on('submit', '#formCreate', function (e) {
                 e.preventDefault();
+                let data = new FormData(this);
 
-                let data = {
-                    student_full_name: $('.student_full_name').val(),
-                    student_email: $('.student_email').val(),
-                    student_phone: $('.student_phone').val(),
-                    student_course: $('.student_course').val()
-                };
+                console.log(data);
+
+                // for(var pair of data) {
+                //     console.log(pair[0]+ ', '+ pair[1]);
+                // }
 
                 $.ajax({
                     type: 'POST',
                     url: '{{ route("student.store") }}',
                     data: data,
                     dataType: 'json',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
                     beforeSend: function () {
                         clearAddStudentModal();
                     },
@@ -349,6 +367,7 @@
                             $('.err_email').text(response.message.student_email);
                             $('.err_phone').text(response.message.student_phone);
                             $('.err_course').text(response.message.student_course);
+                            $('.err_avatar').text(response.message.student_avatar);
                         }
                     }
                 });
