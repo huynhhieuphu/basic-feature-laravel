@@ -102,12 +102,12 @@ class StudentController extends Controller
 
     public function update(Request $request, $id)
     {
-
         $validator = Validator::make($request->all(), [
-            'student_full_name' => 'required|string|max:191',
-            'student_email' => 'required|email|unique:students,student_email,'.$id.',student_id',
-            'student_phone' => 'required|digits:10',
-            'student_course' => 'required|string|max:191',
+            'student_full_name_edit' => 'required|string|max:191',
+            'student_email_edit' => 'required|email|unique:students,student_email,'.$id.',student_id',
+            'student_phone_edit' => 'required|digits:10',
+            'student_course_edit' => 'required|string|max:191',
+            'student_avatar_edit' => 'nullable|mimes:jpeg,jpg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -118,12 +118,28 @@ class StudentController extends Controller
         }
 
         $student = Student::find($id);
-
         if ($student) {
-            $student->student_full_name = $request->input('student_full_name');
-            $student->student_email = $request->input('student_email');
-            $student->student_phone = $request->input('student_phone');
-            $student->student_course = $request->input('student_course');
+            $student->student_full_name = $request->input('student_full_name_edit');
+            $student->student_email = $request->input('student_email_edit');
+            $student->student_phone = $request->input('student_phone_edit');
+            $student->student_course = $request->input('student_course_edit');
+
+            // update image
+            if($request->hasFile('student_avatar_edit')) {
+                $destination =  'app/uploads/'.$student->student_avatar;
+                if(File::exists($destination)) {
+                    File::delete($destination);
+                }
+
+                $file = $request->file('student_avatar_edit');
+                if($file->isValid()) {
+                    $fileName = $file->getClientOriginalName();
+                    $newFile = time() . '-' . $fileName;
+                    $file->move('app/uploads/', $newFile);
+                    $student->student_avatar = $newFile;
+                }
+            }
+
             $student->student_updated_at = time();
 
             if ($student->update()) {
@@ -162,7 +178,7 @@ class StudentController extends Controller
         ]);
     }
 
-    public function destroy(Request $request, $id)
+    public function destroy($id)
     {
         $student = Student::find($id);
         if (!empty($student)) {

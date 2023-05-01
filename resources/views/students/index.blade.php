@@ -68,42 +68,54 @@
          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
+                <form method="POST" action="javascript:void(0)" id="formUpdate" enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editStudentModalLabel">Edit Student</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <ul id="saveForm_errList"></ul>
+                        <input type="hidden" class="student_id_edit">
+                        <div class="form-group">
+                            <label for="student_full_name_edit">Full name</label>
+                            <input type="text" id="student_full_name_edit" name="student_full_name_edit"
+                                   class="student_full_name_edit form-control">
+                            <span class="text-danger err_full_name_edit err_msg_edit"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_email_edit">Email</label>
+                            <input type="text" id="student_email_edit" name="student_email_edit"
+                                   class="student_email_edit form-control">
+                            <span class="text-danger err_email_edit err_msg_edit"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_phone_edit">Phone</label>
+                            <input type="text" id="student_phone_edit" name="student_phone_edit"
+                                   class="student_phone_edit form-control">
+                            <span class="text-danger err_phone_edit err_msg_edit"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_course_edit">Course</label>
+                            <input type="text" id="student_course_edit" name="student_course_edit"
+                                   class="student_course_edit form-control">
+                            <span class="text-danger err_course_edit err_msg_edit"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="student_avatar_edit">Avatar</label>
+                            <input type="file" id="student_avatar_edit" name="student_avatar_edit"
+                                   class="student_avatar_edit form-control">
+                            <img src="" alt="" class="avatar my-2">
+                            <span class="text-danger err_avatar_edit err_msg_edit"></span>
+                        </div>
 
-                    <ul id="saveForm_errList"></ul>
-                    <input type="hidden" class="student_id_edit">
-                    <div class="form-group">
-                        <label for="student_full_name_edit">Full name</label>
-                        <input type="text" id="student_full_name_edit" class="student_full_name_edit form-control">
-                        <span class="text-danger err_full_name_edit err_msg_edit"></span>
                     </div>
-                    <div class="form-group">
-                        <label for="student_email_edit">Email</label>
-                        <input type="text" id="student_email_edit" class="student_email_edit form-control">
-                        <span class="text-danger err_email_edit err_msg_edit"></span>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary update_student">Update</button>
                     </div>
-                    <div class="form-group">
-                        <label for="student_phone_edit">Phone</label>
-                        <input type="text" id="student_phone_edit" class="student_phone_edit form-control">
-                        <span class="text-danger err_phone_edit err_msg_edit"></span>
-                    </div>
-                    <div class="form-group">
-                        <label for="student_course_edit">Course</label>
-                        <input type="text" id="student_course_edit" class="student_course_edit form-control">
-                        <span class="text-danger err_course_edit err_msg_edit"></span>
-                    </div>
-
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary update_student">Update</button>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -145,7 +157,6 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                        <div id="message"></div>
 
                         <table class="table table-bordered">
                             <thead>
@@ -172,6 +183,7 @@
 
 
 @push('script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function () {
             $.ajaxSetup({
@@ -235,37 +247,50 @@
                             $('.student_email_edit').val(response.data.student_email);
                             $('.student_phone_edit').val(response.data.student_phone);
                             $('.student_course_edit').val(response.data.student_course);
+
+                            let public_path = '{{ asset('app/uploads/') }}';
+                            $('.avatar').attr({
+                                'src': public_path + '/' + response.data.student_avatar,
+                                'alt': response.data.student_avatar
+                            });
                         }
 
                         if (response.status === 400) {
-                            $('#message').addClass('alert alert-danger').text(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                text: response.message,
+                            });
                         }
                     }
                 });
             });
 
-            $(document).on('click', '.update_student', function (e) {
+            $(document).on('submit', '#formUpdate', function (e) {
                 e.preventDefault();
 
                 let student_id = $('.student_id_edit').val();
                 let url = '{{ route("student.update", ["id" => ":id"]) }}';
                 url = url.replace(':id', student_id);
 
-                let data = {
-                    student_full_name: $('.student_full_name_edit').val(),
-                    student_email: $('.student_email_edit').val(),
-                    student_phone: $('.student_phone_edit').val(),
-                    student_course: $('.student_course_edit').val()
-                };
+                let formData = new FormData($('form#formUpdate')[0]);
 
                 $.ajax({
-                    type: 'PUT',
+                    type: 'POST',
                     url: url,
-                    data: data,
+                    data: formData,
                     dataType: 'json',
+                    contentType: false,
+                    processData: false,
                     success: function (response) {
                         if (response.status === 200) {
-                            $('#message').addClass('alert alert-success').text(response.message);
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
+
                             $('#editStudentModal').modal('hide');
                             fetchData();
                         }
@@ -280,6 +305,7 @@
                             $('.err_email_edit').text(response.message.student_email);
                             $('.err_phone_edit').text(response.message.student_phone);
                             $('.err_course_edit').text(response.message.student_course);
+                            $('.err_avatar_edit').text(response.message.student_avatar);
                         }
                     }
                 });
@@ -300,7 +326,10 @@
                         }
 
                         if (response.status === 400) {
-                            $('#message').addClass('alert alert-danger').text(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                text: response.message,
+                            });
                         }
                     }
                 });
@@ -313,17 +342,26 @@
                 url = url.replace(':id', student_id);
 
                 $.ajax({
-                    type: 'DELETE',
+                    type: 'POST',
                     url: url,
                     success: function (response) {
                         if (response.status === 200) {
-                            $('#message').addClass('alert alert-danger').text(response.message);
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                             $('#deleteStudentModal').modal('hide');
                             fetchData();
                         }
 
                         if (response.status === 400) {
-                            $('#message').addClass('alert alert-danger').text(response.message);
+                            Swal.fire({
+                                icon: 'error',
+                                text: response.message,
+                            });
                         }
                     }
                 });
@@ -345,7 +383,13 @@
                     },
                     success: function (response) {
                         if (response.status === 200) {
-                            $('#message').addClass('alert alert-success').text(response.message);
+                            Swal.fire({
+                                position: 'top-end',
+                                icon: 'success',
+                                title: response.message,
+                                showConfirmButton: false,
+                                timer: 1500
+                            });
                             $('#addStudentModal').modal('hide');
                             $('form#formCreate')[0].reset();
                             fetchData();

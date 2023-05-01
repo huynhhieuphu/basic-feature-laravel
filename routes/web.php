@@ -23,7 +23,7 @@ Route::prefix('/student')->name('student.')->group(function() {
     Route::post('/', [StudentController::class, 'store'])->name('store');
     Route::get('/fetch-data', [StudentController::class, 'fetch'])->name('fetch');
     Route::get('/{id}/edit', [StudentController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [StudentController::class, 'update'])->name('update');
+    Route::post('/{id}/update', [StudentController::class, 'update'])->name('update');
     Route::get('/{id}/delete', [StudentController::class, 'delete'])->name('delete');
-    Route::delete('/{id}', [StudentController::class, 'destroy'])->name('destroy');
+    Route::post('/{id}/destroy', [StudentController::class, 'destroy'])->name('destroy');
 });
