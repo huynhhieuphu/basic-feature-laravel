@@ -14,9 +14,36 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $data['title'] = 'List Posts';
+
+        $post_query = Post::withCount('comments');
+
+        $filter = $request->query('category');
+        $filter = trim(strip_tags($filter));
+
+        if(!empty($filter)) {
+            $post_query->whereHas('category', function ($query) use($filter) {
+                $query->where('name', $filter);
+            });
+        }
+
+        $keyword = $request->query('keyword');
+        $keyword = trim(strip_tags($keyword));
+
+        if(!empty($keyword)) {
+            $post_query->where('title', 'LIKE', '%'. $keyword .'%');
+        }
+
+        $sort = $request->query('sortByComments');
+        $sort = trim(strip_tags($sort));
+        if(!empty($sort) && in_array($sort, ['asc', 'desc'])) {
+            $post_query->orderBy('comments_count', $sort);
+        }
+
+        $data['categories'] = Category::orderBy('id', 'desc')->get();
+        $data['posts'] = $post_query->orderBy('id', 'desc')->paginate(10)->withQueryString();
         return view('posts.index', $data);
     }
 
