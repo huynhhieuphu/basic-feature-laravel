@@ -31,4 +31,14 @@ class Post extends Model
         return $this->morphMany(Comment::class, 'commentable');
     }
 
+    public function getTagsIdArr()
+    {
+        $tagsId = [];
+        if(!empty($this->tags)){
+            foreach($this->tags as $tag) {
+                $tagsId[] = $tag->id;
+            }
+        }
+        return $tagsId;
+    }
 }

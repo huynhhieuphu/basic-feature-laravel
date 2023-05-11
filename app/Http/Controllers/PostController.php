@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Post;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 
 class PostController extends Controller
 {
@@ -43,7 +44,7 @@ class PostController extends Controller
         }
 
         $data['categories'] = Category::orderBy('id', 'desc')->get();
-        $data['posts'] = $post_query->orderBy('id', 'desc')->paginate(10)->withQueryString();
+        $data['posts'] = $post_query->orderBy('id', 'desc')->paginate(3);
         return view('posts.index', $data);
     }
 
@@ -106,7 +107,14 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        //
+        $data['title'] = 'Show Post';
+        $data['post'] = $post = Post::findOrFail($id);
+
+//        if($post->user_id == auth()->id()) {
+//            abort(403);
+//        }
+
+        return view('posts.show', $data);
     }
 
     /**
@@ -117,7 +125,10 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $data['post'] = Post::findOrFail($id);
+        $data['categories'] = Category::orderBy('id', 'desc')->get();
+        $data['tags'] = Tag::orderBy('id', 'desc')->get();
+        return view('posts.edit', $data);
     }
 
     /**
@@ -129,7 +140,44 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $post = Post::findOrFail($id);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required',
+            'image' => 'nullable|mimes:jpeg,jpg,png|max:2048',
+            'category' => 'required',
+            'tags' => 'required|array'
+        ], [
+            'category.required' => 'Please select choose a category.',
+            'tags.required' => 'Please select choose least one tag.'
+        ]);
+
+        $imageName = $post->image;
+        if ($request->hasFile('image')) {
+            //delete old image
+            $path_image = public_path('uploads/post_image/'. $post->image);
+            if(File::exists($path_image)) {
+                File::delete($path_image);
+            }
+            // upload file
+            $image = $request->file('image');
+            $imageName = time().'.'.$image->getClientOriginalExtension();
+            $image->move(public_path('uploads/post_image'), $imageName);
+        }
+
+        $post->update([
+            'title' => $request->input('title'),
+            'description' => $request->input('description'),
+            'image' => $imageName,
+            'user_id' => 1, // auth()->id() == auth()->user()->id
+            'category_id' => $request->input('category')
+        ]);
+
+        $post->tags()->sync($request->input('tags'));
+
+        return redirect()->route('posts.index')->with('success', 'Post Successfully Updated');
+
     }
 
     /**
@@ -140,6 +188,13 @@ class PostController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        //delete old image
+        $path_image = public_path('uploads/post_image/'. $post->image);
+        if(File::exists($path_image)) {
+            File::delete($path_image);
+        }
+        $post->delete();
+        return redirect()->route('posts.index')->with('success', 'Post Successfully Deleted');
     }
 }

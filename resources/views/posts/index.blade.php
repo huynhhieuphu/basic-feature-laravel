@@ -76,7 +76,7 @@
                                             <td style="width: 250px;">
                                                 <a href="{{ route('posts.show', $post->id) }}" class="btn btn-primary">View</a>
                                                 <a href="{{ route('posts.edit', $post->id) }}" class="btn btn-success">Edit</a>
-                                                <a href="" class="btn btn-danger">Delete</a>
+                                                <a href="javascript:delete_post('{{ route('posts.destroy', $post->id) }}')" class="btn btn-danger">Delete</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -87,22 +87,29 @@
                                 @endif
                                 </tbody>
                             </table>
-                        </div>
 
-                        <div class="d-flex justify-content-end">
-                            {{ $posts->links() }}
+                            <div class="d-flex justify-content-end">
+                                {{ $posts->appends(request()->query())->links() }}
+                            </div>
                         </div>
-
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <form id="delete_post_form" method="post">
+        @csrf
+        @method('delete')
+    </form>
+
 @endsection
 
 @push('script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        let query_string = <?php echo json_encode((object) request()->query()); ?>;
+        {{--let query_string = <?php echo json_encode((object) request()->query()); ?>;--}}
+        let query_string = <?php echo json_encode((object) request()->only(['category', 'keyword', 'sortByComments'])); ?>;
         /*console.log(typeof query_string);
         console.log(query_string);*/
 
@@ -116,6 +123,22 @@
         function sort(value) {
             Object.assign(query_string, {'sortByComments' : value});
             window.location.href = "{{ route('posts.index') }}?" + $.param(query_string);
+        }
+
+        function delete_post(url) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $('#delete_post_form').attr('action', url).submit();
+                }
+            })
         }
     </script>
 @endpush
